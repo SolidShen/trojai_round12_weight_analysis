@@ -1,0 +1,20 @@
+.idea
+output.txt
+test.txt
+features.csv
+*.png
+model/
+/augment_models
+
+# Python
+__pychache__
+*.pyc
+*.simg
+*.sif
+*.log 
+*.out
+
+
+token.pickle
+.cache
+

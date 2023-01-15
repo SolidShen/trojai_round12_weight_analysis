@@ -1,0 +1,14 @@
+{	
+	"train_jacobian_param_if_noise": false,
+	"train_jacobian_param_noise_scale": 0.1,
+	"train_jacobian_param_n_samples": 100,
+	"train_jacobian_param_sample_classes": "1",
+	"train_jacobian_param_aggr_method": "max",
+	"train_jacobian_param_if_reduce_dim": false,
+	"train_gradient_boosting_param_n_estimators": 4000,
+	"train_gradient_boosting_param_learning_rate": 0.001,
+	"train_gradient_boosting_param_max_depth": 3,
+	"train_gradient_boosting_param_subsample": 0.7,
+	"train_gradient_boosting_param_max_features": "sqrt",
+	"train_gradient_boosting_param_loss": "log_loss"
+}
