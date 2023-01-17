@@ -1,1 +1,1 @@
-{"train_accuracy": 1.0, "train_log_loss": 9.992007221626415e-16, "train_roc_auc": 1.0, "cv_accuracy": 0.868483709273183, "cv_log_loss": -0.33894933251018655, "cv_roc_auc": 0.9242434904996483}
+{"train_accuracy": 1.0, "train_log_loss": 9.992007221626415e-16, "train_roc_auc": 1.0, "cv_accuracy": 0.8564285714285713, "cv_log_loss": -0.3618821661090005, "cv_roc_auc": 0.9162258581593556}
