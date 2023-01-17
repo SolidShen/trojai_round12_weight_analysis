@@ -7,16 +7,16 @@ from tqdm import tqdm
 import logging
 
 
-def model_augmentation(model,scaler,model_dirpath,model_id,aug_num,delta_scale,aug_model_dirpath,cri_thres=0.95):
+def model_augmentation(model,scaler,model_dirpath,aug_num,delta_scale,cri_thres=0.95):
     
     
-    logging.info('Model Augmentation via random noises')
+    # logging.info('Model Augmentation via random noises')
     
     
     aug_model_list = []
     
-    clean_data_dirpath = os.path.join(model_dirpath, model_id, 'clean-example-data')
-    poison_data_dirpath = os.path.join(model_dirpath, model_id, 'poisoned-example-data')   
+    clean_data_dirpath = os.path.join(model_dirpath, 'clean-example-data')
+    poison_data_dirpath = os.path.join(model_dirpath, 'poisoned-example-data')   
     
     
     labels = []
@@ -70,7 +70,7 @@ def model_augmentation(model,scaler,model_dirpath,model_id,aug_num,delta_scale,a
         poison_inputs = torch.stack(poison_inputs).cuda()
         poison_labels = torch.tensor(poison_labels).cuda()
     
-    for aug_id in tqdm(range(aug_num)):
+    for aug_id in range(aug_num):
         aug_model = copy.deepcopy(model)
 
         for layer_id, (name, param) in enumerate(aug_model.named_parameters()):
@@ -101,6 +101,6 @@ def model_augmentation(model,scaler,model_dirpath,model_id,aug_num,delta_scale,a
                 aug_model_list.append(aug_model.cpu())
     
     
-    logging.info('Number of augmented models: {}'.format(len(aug_model_list)))
+    # logging.info('Number of augmented models: {}'.format(len(aug_model_list)))
     
     return aug_model_list

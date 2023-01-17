@@ -19,7 +19,8 @@ import importlib
 import pickle 
 import json 
 
-
+from utils.cross_validation import cross_validation
+from utils.augmentation import model_augmentation
 from utils.abstract import AbstractDetector
 from utils.jacobian import get_jacobian
 from utils.feature_extraction import get_layer_features, align_layer_features,get_model_features,get_weight_product
@@ -164,8 +165,29 @@ class WeightAnalysisDetector(AbstractDetector):
         train_label = [] 
         
         
-        # feat_list = ['min','max','mean','std','skewness','kurtosis','svd','l1_norm','l2_norm','l_inf_norm']
-        # layer_selection = 'all'
+        augmentation = False 
+        
+        
+        
+        
+        # cross_validation
+        
+        # base_model = GradientBoostingClassifier(**self.GB_kwargs,random_state=random_seed)
+        # clf_model = CalibratedClassifierCV(base_estimator=base_model, cv=5)
+        
+        # self.weight_aug_kwargs = {
+        #     'augmentation': True,
+        # }
+        
+        
+        # cross_validation(clf_model,scaler,models_list,models_ground_truth_list,models_name_list,**self.weight_feat_kwargs,**self.weight_aug_kwargs)
+        # exit()
+        
+        
+        
+        
+        
+        
         
         
         
@@ -183,9 +205,12 @@ class WeightAnalysisDetector(AbstractDetector):
             # model_jacobian = get_jacobian(clean_data_dirpath,model,scaler,**self.jaco_kwargs)
             
             
+            
             # model_feat = align_layer_features(feats=get_layer_features(model,feat_list=feat_list,layer_selection=layer_selection))
             
             model_feat = get_weight_product(model,self.weight_feat_kwargs['if_bias'])
+            
+            
             
             # model_feat = get_model_features(model,feat_list=feat_list)
 
@@ -197,14 +222,26 @@ class WeightAnalysisDetector(AbstractDetector):
                 
             train_data = np.vstack((train_data, model_feat))
             
+            if augmentation:
+                
+                aug_model_list = model_augmentation(model,scaler,model_name,aug_num=3,delta_scale=0.3)
+                for aug_model in aug_model_list:
+                    aug_model_feat = get_weight_product(aug_model,self.weight_feat_kwargs['if_bias'])
+
+
+                    if train_data is None:
+                        train_data = aug_model_feat
+                        continue
+                        
+                    train_data = np.vstack((train_data, aug_model_feat))
+                    train_label.append(model_ground_truth)
+                    
+                
+        #! augment train data
         
         
         
-        
-        # base_model = GradientBoostingClassifier(n_estimators=4000, learning_rate=0.001, max_depth=3, subsample=0.7,
-        #                               max_features='sqrt', random_state=519, loss='log_loss')
-        
-        
+
         
         logging.info("Training GradientBoosting model...")
         
@@ -216,7 +253,6 @@ class WeightAnalysisDetector(AbstractDetector):
         scoring = {'accuracy', 'roc_auc', 'neg_log_loss'}
         
         cv_score = cross_validate(clf_model, train_data, train_label, cv=5,scoring=scoring)
-        # mean_score = np.mean(cv_score)
         
         cv_acc = cv_score['test_accuracy']
         cv_roc_auc = cv_score['test_roc_auc']
