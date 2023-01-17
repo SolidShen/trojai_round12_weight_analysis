@@ -6,6 +6,17 @@ sys.path.append('../')
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 
 
+def get_model_gram_features(model,order_list):
+    #TODO define total dim of features
+    #TODO for different layers, assign dims based on number of weight values 
+    #TODO e.g. run svd for each layer weight matrix or (gram matrix)
+    #TODO take top k singular values and add to feature vector 
+    #TODO k is porportional to the number of weight values in the layer
+    #TODO can also visulize the gram matrix and see if there are any patterns
+    
+    raise NotImplementedError 
+
+
 def get_model_features(model,feat_list):
     
     model = model.cuda()
