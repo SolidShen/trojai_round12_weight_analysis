@@ -165,7 +165,7 @@ class WeightAnalysisDetector(AbstractDetector):
         train_label = [] 
         
         
-        augmentation = False 
+        augmentation = True 
         
         
         
@@ -224,7 +224,7 @@ class WeightAnalysisDetector(AbstractDetector):
             
             if augmentation:
                 
-                aug_model_list = model_augmentation(model,scaler,model_name,aug_num=3,delta_scale=0.3)
+                aug_model_list = model_augmentation(model,scaler,model_name,aug_num=2,delta_scale=0.4)
                 for aug_model in aug_model_list:
                     aug_model_feat = get_weight_product(aug_model,self.weight_feat_kwargs['if_bias'])
 
