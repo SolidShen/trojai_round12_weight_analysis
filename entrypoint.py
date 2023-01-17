@@ -6,7 +6,7 @@ import warnings
 
 import jsonschema
 
-from detector import JacobianDetector
+from detector import WeightAnalysisDetector
 
 warnings.filterwarnings("ignore")
 
@@ -44,7 +44,7 @@ def inference_mode(args):
     jsonschema.validate(instance=config_json, schema=schema_json)
 
     # Create the detector instance and loads the metaparameters.
-    detector = JacobianDetector(args.metaparameters_filepath, args.learned_parameters_dirpath, args.scale_parameters_filepath)
+    detector = WeightAnalysisDetector(args.metaparameters_filepath, args.learned_parameters_dirpath, args.scale_parameters_filepath)
 
     logging.info("Calling the trojan detector")
     detector.infer(args.model_filepath, args.result_filepath, args.scratch_dirpath, args.examples_dirpath, args.round_training_dataset_dirpath)
@@ -60,7 +60,7 @@ def configure_mode(args):
     jsonschema.validate(instance=config_json, schema=schema_json)
 
     # Create the detector instance and loads the metaparameters.
-    detector = JacobianDetector(args.metaparameters_filepath, args.learned_parameters_dirpath, args.scale_parameters_filepath)
+    detector = WeightAnalysisDetector(args.metaparameters_filepath, args.learned_parameters_dirpath, args.scale_parameters_filepath)
 
     logging.info("Calling configuration mode")
     detector.configure(args.configure_models_dirpath, args.automatic_configuration)

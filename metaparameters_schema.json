@@ -1,64 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Trojan Detection Container (trojai-example) - Perspecta-PurdueRutgers v1.3",
-  "technique": "Jacobian Feature GradientBoosting Classifier",
-  "technique_description": "Extract Jacobian matrix w.r.t certain class input, train a GB classifier",
-  "technique_changes": "output probability with calibration and add output logits into feature vector",
+  "title": "Trojan Detection Container (trojai-example) - Perspecta-PurdueRutgers v2.0",
+  "technique": "Weight Production Feature GradientBoosting Classifier",
+  "technique_description": "Take weight production as features, train a GB classifier",
+  "technique_changes": "initial commit",
   "commit_id": "ff3270fa1fceebfda4458e1ee4659073c6b84c18",
-  "repo_name": "git@github.com:SolidShen/Trojai_Round12_Jacobian.git",
+  "repo_name": "git@github.com:SolidShen/trojai_round12_weight_analysis.git",
   "required": [],
   "additionalProperties": false,
   "type": "object",
   "properties": {
-
-	"train_jacobian_param_if_noise": {
-		"description": "whether use noise or clean inputs to compute jacobian",
-		"type": "boolean",
-		"default": false
-	},
-
-	"train_jacobian_param_noise_scale": {
-		"description": "noise scale",
-		"type": "number",
-		"minimum": 0,
-		"maximum": 1,
-		"suggested_minimum": 0,
-		"suggested_maximum": 1
-	},
-
-
-	"train_jacobian_param_n_samples": {
-		"description": "number of samples to use for Jacobian computation",
-		"type": "number",
-		"minimum": 10,
-		"maximum": 10000,
-		"suggested_minimum": 10,
-		"suggested_maximum": 1000
-	},
-
-
-	"train_jacobian_param_sample_classes": {
-		"description": "list of classes to use for Jacobian computation",
-		"type": "string",
-		"enum": ["0", "1", "both"]
-	},
 	
-
-	"train_jacobian_param_aggr_method": {
-		"description": "Function to aggreate the Jacobian matrix.",
-		"type": "string",
-		"enum": ["mean", "max", "min"]
-	},
-
-
 	
-
-	"train_jacobian_param_if_reduce_dim": {
-		"description": "whether reduce feature dimension of jacobian matrix",
-		"type": "boolean",
-		"default": false
+	"train_weight_feat_param_if_bias": {
+		"description": "If bias is added to the weight feature",
+		"type": "boolean"
 	},
-
 
 
 

@@ -1,0 +1,1 @@
+{"train_weight_feat_param_if_bias": true, "train_gradient_boosting_param_n_estimators": 4000, "train_gradient_boosting_param_learning_rate": 0.001, "train_gradient_boosting_param_max_depth": 3, "train_gradient_boosting_param_subsample": 0.7, "train_gradient_boosting_param_max_features": "sqrt", "train_gradient_boosting_param_loss": "log_loss"}

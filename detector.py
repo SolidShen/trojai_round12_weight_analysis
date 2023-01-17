@@ -14,6 +14,7 @@ from sklearn.metrics import roc_auc_score, accuracy_score,log_loss
 from sklearn.model_selection import cross_validate
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.pipeline import Pipeline
 import importlib
 import pickle 
 import json 
@@ -21,12 +22,13 @@ import json
 
 from utils.abstract import AbstractDetector
 from utils.jacobian import get_jacobian
+from utils.feature_extraction import get_layer_features, align_layer_features,get_model_features,get_weight_product
 from utils.models import load_models_dirpath
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
 
 
 
-class JacobianDetector(AbstractDetector):
+class WeightAnalysisDetector(AbstractDetector):
     def __init__(self, metaparameter_filepath, learned_parameters_dirpath, scale_parameters_filepath):
             
         """Detector initialization function.
@@ -50,25 +52,10 @@ class JacobianDetector(AbstractDetector):
         self.model_filepath = join(self.learned_parameters_dirpath, "model.bin")
         
 
-        self.jaco_kwargs = {
+        self.weight_feat_kwargs = {
             
-            'if_noise': metaparameters[
-                'train_jacobian_param_if_noise'
-            ],
-            'noise_scale': metaparameters[
-                'train_jacobian_param_noise_scale'
-            ],
-            'n_samples': metaparameters[
-                'train_jacobian_param_n_samples'
-            ],
-            'sample_classes': metaparameters[
-                'train_jacobian_param_sample_classes'
-            ],
-            'aggr_method': metaparameters[
-                'train_jacobian_param_aggr_method'
-            ],
-            'if_reduce_dim': metaparameters[
-                'train_jacobian_param_if_reduce_dim'
+            'if_bias': metaparameters[
+                'train_weight_feat_param_if_bias'
             ]
             
         }
@@ -95,28 +82,11 @@ class JacobianDetector(AbstractDetector):
             
         }
         
-        #! note for metaparameters ===============================
-        #! if_aug 
-        #! aug_num 
-        #! aug_models_dirpath
-        
-        #! if_noise 
-        #! noise scale 
-        #! n_samples
-        #! sample_classes
-        #! aggr_method
-        #! if_reduce_dim
-        #! 
 
 
     def write_metaparameters(self):
         metaparameters = {
-            "train_jacobian_param_if_noise": self.jaco_kwargs["if_noise"],
-            "train_jacobian_param_noise_scale": self.jaco_kwargs["noise_scale"],
-            "train_jacobian_param_n_samples": self.jaco_kwargs["n_samples"],
-            "train_jacobian_param_sample_classes": self.jaco_kwargs["sample_classes"],
-            "train_jacobian_param_aggr_method": self.jaco_kwargs["aggr_method"],
-            "train_jacobian_param_if_reduce_dim": self.jaco_kwargs["if_reduce_dim"],
+            "train_weight_feat_param_if_bias": self.weight_feat_kwargs["if_bias"],
             "train_gradient_boosting_param_n_estimators": self.GB_kwargs["n_estimators"],
             "train_gradient_boosting_param_learning_rate": self.GB_kwargs["learning_rate"],
             "train_gradient_boosting_param_max_depth": self.GB_kwargs["max_depth"],
@@ -181,7 +151,7 @@ class JacobianDetector(AbstractDetector):
 
         
         
-        logging.info("Jacobian feature extraction applied. Creating feature file...")
+        logging.info("Weight statistics feature extraction applied. Creating feature file...")
         
         scaler = StandardScaler()
         scale_params = np.load(self.scale_parameters_filepath)
@@ -194,6 +164,11 @@ class JacobianDetector(AbstractDetector):
         train_label = [] 
         
         
+        # feat_list = ['min','max','mean','std','skewness','kurtosis','svd','l1_norm','l2_norm','l_inf_norm']
+        # layer_selection = 'all'
+        
+        
+        
         for idx in tqdm(range(len(models_list))):
             
             
@@ -203,19 +178,24 @@ class JacobianDetector(AbstractDetector):
             
             train_label.append(model_ground_truth) 
             
-            clean_data_dirpath = os.path.join(model_name,'clean-example-data')
+            # clean_data_dirpath = os.path.join(model_name,'clean-example-data')
             
-            model_jacobian = get_jacobian(clean_data_dirpath,model,scaler,**self.jaco_kwargs)
+            # model_jacobian = get_jacobian(clean_data_dirpath,model,scaler,**self.jaco_kwargs)
             
             
+            # model_feat = align_layer_features(feats=get_layer_features(model,feat_list=feat_list,layer_selection=layer_selection))
             
+            model_feat = get_weight_product(model,self.weight_feat_kwargs['if_bias'])
+            
+            # model_feat = get_model_features(model,feat_list=feat_list)
+
             
             
             if train_data is None:
-                train_data = model_jacobian
+                train_data = model_feat
                 continue
                 
-            train_data = np.vstack((train_data, model_jacobian))
+            train_data = np.vstack((train_data, model_feat))
             
         
         
@@ -230,6 +210,8 @@ class JacobianDetector(AbstractDetector):
         
         base_model = GradientBoostingClassifier(**self.GB_kwargs,random_state=random_seed)
         clf_model = CalibratedClassifierCV(base_estimator=base_model, cv=5)
+        
+        
         
         scoring = {'accuracy', 'roc_auc', 'neg_log_loss'}
         
@@ -246,9 +228,13 @@ class JacobianDetector(AbstractDetector):
                 
         # logging.info('cv_score: {} mean_score: {:.4f}'.format(acc,mean_score))
         
-        logging.info('Cross Validation Metrics: Accuracy: {}[{:.4f}] \n  ROC_AUC: {}[{:.4f}] \n Log_Loss: {}[{:.4f}]'.format(cv_acc,mean_acc,cv_roc_auc,mean_roc_auc,cv_log_loss,mean_log_loss))
+        logging.info('Cross Validation Scores:')
         
+        logging.info('Accuracy: {} [{:.4f}]'.format(cv_acc,mean_acc))
+        logging.info('ROC_AUC: {} [{:.4f}]'.format(cv_roc_auc,mean_roc_auc))
+        logging.info('Log_Loss: {} [{:.4f}]'.format(cv_log_loss,mean_log_loss))
         
+                
         clf_model.fit(train_data, train_label)
         score_rbf = clf_model.score(train_data, train_label)
         logging.info("The train score of rbf is : %f" % score_rbf)
@@ -315,26 +301,32 @@ class JacobianDetector(AbstractDetector):
         
         model = torch.load(model_filepath).cuda().eval()
         
-        model_jacobian = get_jacobian(examples_dirpath,model,scaler,**self.jaco_kwargs).reshape(1, -1)
+        # model_jacobian = get_jacobian(examples_dirpath,model,scaler,**self.jaco_kwargs).reshape(1, -1)
+        
+        
+        model_feat = get_weight_product(model,self.weight_feat_kwargs['if_bias']).reshape(1, -1)
         
 
 
         
         
         
-        probability = (clf_model.predict_proba(model_jacobian)[0][1])
+        probability = (clf_model.predict_proba(model_feat)[0][1])
         
         # probability = str(clf_model.predict_proba(model_jacobian)[0][1])
         # binarize output 
         # bin_probability = str(clf_model.predict(model_jacobian)[0])
         
-        if probability > 0.42:
-            cali_probability = 0.92
         
-        else:
-            cali_probability = 0
-            
         
+        # if probability > 0.42:
+        #     cali_probability = 0.92
+        
+        # else:
+        #     cali_probability = 0
+        
+        
+        cali_probability = probability
         cali_probability = str(cali_probability)
         
         
@@ -368,13 +360,13 @@ if __name__ == '__main__':
             format="%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s",
         )
     
-    detector = JacobianDetector(metaparameters_filepath, learned_parameters_dirpath, scale_parameters_filepath)
-    # detector.manual_configure(models_dirpath)
-    detector.infer(model_filepath,
-        result_filepath,
-        scratch_dirpath,
-        examples_dirpath,
-        round_training_dataset_dirpath)
+    detector = WeightAnalysisDetector(metaparameters_filepath, learned_parameters_dirpath, scale_parameters_filepath)
+    detector.manual_configure(models_dirpath)
+    # detector.infer(model_filepath,
+    #     result_filepath,
+    #     scratch_dirpath,
+    #     examples_dirpath,
+    #     round_training_dataset_dirpath)
     
 
 

@@ -16,23 +16,24 @@ def get_weight_distribution(model):
         if isinstance(layer, torch.nn.Linear):
             
             weights = layer.weight.data.flatten().cpu().numpy()
-            weight_distribution.append(weights)
+            weight_distribution.extend(weights)
+            # weight_distribution.append(weights)
             
     return weight_distribution
 
 
 def visualize_weight_distribution(weights,model_filepath,n_bins=50):
     
-    for layer_id in tqdm(range(len(weights))):
+    
         
-        weight = weights[layer_id]
-        # counts, bins = np.histogram(weight)
-        
-        # plt.stairs(counts, bins)
-        plt.hist(weight, bins=n_bins)
-        plt.savefig('../scratch/hist_{}_{}.png'.format(model_filepath,layer_id))
-        
-       
+    # weight = weights[layer_id]
+    # counts, bins = np.histogram(weight)
+    
+    # plt.stairs(counts, bins)
+    plt.hist(weights, bins=n_bins)
+    plt.savefig('../scratch/hist_{}_all.png'.format(model_filepath))
+    
+    
         
         
     
@@ -41,7 +42,7 @@ def visualize_weight_distribution(weights,model_filepath,n_bins=50):
 
 if __name__ == '__main__':
     
-    model_filepath = '/data3/share/trojai/trojai-round12-cyber-v1-dataset/models/id-00000007/model.pt'
+    model_filepath = '/data3/share/trojai/trojai-round12-cyber-v1-dataset/models/id-00000009/model.pt'
     model = torch.load(model_filepath).cuda()
     model = model.eval()
     

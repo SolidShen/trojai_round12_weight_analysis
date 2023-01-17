@@ -1,0 +1,1 @@
+{"train_accuracy": 1.0, "train_log_loss": 9.992007221626413e-16, "train_roc_auc": 1.0, "cv_accuracy": 0.8333333333333333, "cv_log_loss": -0.4090239969656576, "cv_roc_auc": 0.9125}
