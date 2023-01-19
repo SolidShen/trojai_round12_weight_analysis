@@ -8,10 +8,13 @@ import numpy as np
 from tqdm import tqdm
 import torch 
 
-from sklearn.preprocessing import StandardScaler
+import xgboost as xgb
+from scipy.stats import uniform, randint
 
+
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score, accuracy_score,log_loss
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_validate,RandomizedSearchCV,GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.pipeline import Pipeline
@@ -199,17 +202,86 @@ class WeightAnalysisDetector(AbstractDetector):
             
         
         
+
         
         
-        # base_model = GradientBoostingClassifier(n_estimators=4000, learning_rate=0.001, max_depth=3, subsample=0.7,
-        #                               max_features='sqrt', random_state=519, loss='log_loss')
+        
+        
+        base_model = GradientBoostingClassifier(n_estimators=4000, learning_rate=0.001, max_depth=3, subsample=0.7,
+                                      max_features='sqrt', random_state=519, loss='log_loss')
         
         
         
         logging.info("Training GradientBoosting model...")
         
-        base_model = GradientBoostingClassifier(**self.GB_kwargs,random_state=random_seed)
-        clf_model = CalibratedClassifierCV(base_estimator=base_model, cv=5)
+        # base_model = GradientBoostingClassifier(**self.GB_kwargs,random_state=random_seed)
+        
+
+        # 'n_estimators': metaparameters[
+        #     'train_gradient_boosting_param_n_estimators'
+        #     ],
+        # 'learning_rate': metaparameters[
+        #     'train_gradient_boosting_param_learning_rate'
+        #     ],
+        # 'max_depth': metaparameters[
+        #     'train_gradient_boosting_param_max_depth'
+        #     ],
+        # 'subsample': metaparameters[
+        #     'train_gradient_boosting_param_subsample'
+        #     ],
+        # 'max_features': metaparameters[
+        #     'train_gradient_boosting_param_max_features'
+        #     ],
+        
+        # params = {
+        #     "learning_rate": uniform(0.0005, 0.00015), # default 0.1 
+        #     "max_depth": randint(2, 6), # default 3
+        #     "n_estimators": randint(3000, 5000), # default 100
+        #     "subsample": uniform(0.8, 0.4)
+        # }
+                
+        
+        # base_model = xgb.XGBClassifier(objective="binary:logistic",eval_metric = "logloss", booster='gbtree',
+        #                                colsample_bytree=0.75,
+        #                                gamma=0.37,
+        #                                learning_rate=0.05,
+        #                                max_depth=5,
+        #                                n_estimators=470,
+        #                                subsample=0.89)
+        
+        
+        
+        # params = {
+        #     "colsample_bytree": uniform(0.7, 0.3),
+        #     "gamma": uniform(0, 0.5),
+        #     "learning_rate": uniform(0.03, 0.3), # default 0.1 
+        #     "max_depth": randint(2, 6), # default 3
+        #     "n_estimators": randint(100, 1000), # default 100
+        #     "subsample": uniform(0.8, 0.4)
+        # }
+
+        # search = RandomizedSearchCV(base_model, param_distributions=params, random_state=42, n_iter=200, cv=5, verbose=1, n_jobs=1, return_train_score=True)
+
+        # search.fit(train_data, train_label)
+
+        # def report_best_scores(results, n_top=3):
+        #     for i in range(1, n_top + 1):
+        #         candidates = np.flatnonzero(results['rank_test_score'] == i)
+        #         for candidate in candidates:
+        #             print("Model with rank: {0}".format(i))
+        #             print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+        #                 results['mean_test_score'][candidate],
+        #                 results['std_test_score'][candidate]))
+        #             print("Parameters: {0}".format(results['params'][candidate]))
+        #             print("")
+            
+            
+        # report_best_scores(search.cv_results_, 1)
+
+        # exit()
+        
+        
+        clf_model = CalibratedClassifierCV(estimator=base_model, cv=5)
         
         
         

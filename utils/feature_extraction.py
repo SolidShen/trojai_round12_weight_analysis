@@ -1,6 +1,7 @@
 import torch 
 import numpy as np 
 import sys 
+import matplotlib.pyplot as plt
 from scipy.stats import kurtosis, skew
 sys.path.append('../')
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
@@ -113,13 +114,38 @@ def get_weight_product(model,if_bias=True):
         
     
     if if_bias:
-        weight_features = torch.cat((weight_product,bias_product),dim=1).flatten().cpu().detach().numpy()
-    
+        
+        weight_features = torch.cat((weight_product,bias_product),dim=1)
+        
+        weight_features/=weight_features.norm(p=1)
+        weight_features = weight_features.flatten().cpu().detach().numpy()
+        # tmp = torch.cat((weight_product,bias_product),dim=1)
+        # mat = torch.matmul(tmp, tmp.transpose(0,1))
+        
+        # eigvalue = torch.linalg.eigvals(mat).float().cpu().detach().numpy()
+        # print(eigvalue)
+        # plt.hist(eigvalue)
+        # plt.savefig('eigvalue.png')
+        # plt.clf()
+        
+        
+        
+        
     else: 
-        weight_features = weight_product.flatten().cpu().detach().numpy()
+        weight_features = weight_product
+        weight_features/=weight_features.norm(p=1)
+        weight_features = weight_features.flatten().cpu().detach().numpy()
     
     
     
+    
+    
+    weight_features = weight_features
+    
+    
+    
+    
+
     
     
     
@@ -335,13 +361,19 @@ def align_layer_features(feats,padding=True,padding_value=-1,max_len=7):
 
 if __name__ == '__main__':
     
-    model_filepath = '/data3/share/trojai/trojai-round12-cyber-v1-dataset/models/id-00000031/model.pt'
+    model_filepath = '/data3/share/trojai/trojai-round12-cyber-v1-dataset/models/id-00000062/model.pt'
     model = torch.load(model_filepath).cuda()
     model = model.eval()
     # feat_list = ['min','max','mean','std','skewness','kurtosis','svd','norm']
     # feat = get_layer_features(model,feat_list=feat_list,layer_selection='all')
     # align_layer_features(feat)
     # get_layer_weight_correlation(model,layer_selection='all')
-    get_weight_product(model)
+    weight_features = get_weight_product(model)
+    
+    plt.hist(weight_features)
+    
+    plt.savefig('weight_product_62.png')
+    
+
     
     
