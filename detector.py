@@ -8,7 +8,7 @@ import numpy as np
 from tqdm import tqdm
 import torch 
 
-import xgboost as xgb
+# import xgboost as xgb
 from scipy.stats import uniform, randint
 
 

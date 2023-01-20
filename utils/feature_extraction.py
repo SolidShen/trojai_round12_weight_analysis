@@ -1,7 +1,7 @@
 import torch 
 import numpy as np 
 import sys 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from scipy.stats import kurtosis, skew
 sys.path.append('../')
 from archs import Net2, Net3, Net4, Net5, Net6, Net7, Net2r, Net3r, Net4r, Net5r, Net6r, Net7r, Net2s, Net3s, Net4s, Net5s, Net6s, Net7s
@@ -370,9 +370,9 @@ if __name__ == '__main__':
     # get_layer_weight_correlation(model,layer_selection='all')
     weight_features = get_weight_product(model)
     
-    plt.hist(weight_features)
+    # plt.hist(weight_features)
     
-    plt.savefig('weight_product_62.png')
+    # plt.savefig('weight_product_62.png')
     
 
     
