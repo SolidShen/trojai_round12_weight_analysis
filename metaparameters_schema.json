@@ -4,7 +4,7 @@
   "technique": "Weight Production Feature GradientBoosting Classifier",
   "technique_description": "Take weight production as features with normalization, train a GB classifier",
   "technique_changes": "initial commit",
-  "commit_id": "da411296e8c60acb2b6ccfb965756f2e5c38ff7e",
+  "commit_id": "8b5de2e6f45b06d6a380b3c91fd9b267651792ce",
   "repo_name": "git@github.com:SolidShen/trojai_round12_weight_analysis.git",
   "required": [],
   "additionalProperties": false,
